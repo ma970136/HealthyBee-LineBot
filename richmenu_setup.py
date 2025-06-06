@@ -16,19 +16,19 @@ line_bot_api = LineBotApi(channel_token)
 try:
     # Step 1: 建立 Rich Menu 設定
     rich_menu = RichMenu(
-        size={"width": 2500, "height": 843},
+        size={"width": 2500, "height": 1686},
         selected=True,
         name="HealthyBee Main Menu",
         chat_bar_text="📋 開啟主選單",
         areas=[
-            RichMenuArea(bounds=RichMenuBounds(x=0, y=0, width=1250, height=421),
-                         action=MessageAction(label="我要綁定", text="我要綁定")),
-            RichMenuArea(bounds=RichMenuBounds(x=1250, y=0, width=1250, height=421),
-                         action=MessageAction(label="選擇語言", text="選擇語言")),
-            RichMenuArea(bounds=RichMenuBounds(x=0, y=421, width=1250, height=422),
-                         action=MessageAction(label="查詢體溫", text="查詢體溫")),
-            RichMenuArea(bounds=RichMenuBounds(x=1250, y=421, width=1250, height=422),
-                         action=MessageAction(label="使用說明", text="教學")),
+            RichMenuArea(bounds=RichMenuBounds(x=0, y=0, width=1250, height=843),
+                        action=MessageAction(label="我要綁定", text="我要綁定")),
+            RichMenuArea(bounds=RichMenuBounds(x=1250, y=0, width=1250, height=843),
+                        action=MessageAction(label="選擇語言", text="選擇語言")),
+            RichMenuArea(bounds=RichMenuBounds(x=0, y=843, width=1250, height=843),
+                        action=MessageAction(label="查詢體溫", text="查詢體溫")),
+            RichMenuArea(bounds=RichMenuBounds(x=1250, y=843, width=1250, height=843),
+                        action=MessageAction(label="教學", text="教學")),
         ]
     )
 

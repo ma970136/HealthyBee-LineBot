@@ -1,12 +1,20 @@
 # HealthyBee LINE Bot 🐝
 
-This is a LINE chatbot that fetches temperature data from ThingSpeak and replies to users in the chatroom.
+This is a LINE chatbot for elderly health management.
 
-## Features
-- Reads sensor data from ThingSpeak
-- Calculates average of last 10 entries
-- Replies via LINE Messaging API
-- Built with Flask
+- 📝 Features:
+  - Passport ID binding
+  - Multi-language quick menu
+  - Health data upload to ThingSpeak
+  - Rich Menu UI with 4 buttons (bind, language, query, help)
+
+- 🟡 Deployment: [Render link](https://healthybee-linebot.onrender.com)
+
+- 🔐 Env Vars:
+  - LINE_CHANNEL_ACCESS_TOKEN
+  - LINE_CHANNEL_SECRET
+  - THINGSPEAK_CHANNEL_ID
+  - THINGSPEAK_API_KEY
 
 ## Getting Started
 

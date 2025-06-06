@@ -122,17 +122,29 @@ def handle_message(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
-    user_message = event.message.text.strip()
+    msg = event.message.text.strip()
 
-    # 處理護照號碼綁定
-    if user_message.startswith("護照號碼:"):
-        reply = bind_passport_id(user_id, user_message)
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
+    # 綁定流程啟動（使用者點選 "我要綁定"）
+    if msg == "我要綁定":
+        reply_text = "🐝 請輸入護照號碼（共數字 9 碼）："
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
         return
 
-    # 其他指令...
-    # 你可以在這裡繼續寫體溫、血壓等處理邏輯
+    # 綁定護照號碼（9 碼純數字）
+    if msg.isdigit() and len(msg) == 9:
+        # 儲存到 JSON 檔案
+        with open("user_passport.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        data[user_id] = msg
+        with open("user_passport.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
+        reply_text = f"✅ 已成功綁定護照號碼：{msg}"
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
+        return
+
+    # 若有其他訊息未匹配，保留給語言查詢等
+    ...
 # 啟動 Flask App
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

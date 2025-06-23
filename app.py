@@ -145,6 +145,10 @@ def handle_message(event):
 
     # 若有其他訊息未匹配，保留給語言查詢等
     ...
+@app.route("/", methods=["GET"])
+def home():
+    return "HealthyBee is running 🐝"
+
 # 啟動 Flask App
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

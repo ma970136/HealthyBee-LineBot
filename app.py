@@ -107,7 +107,7 @@ def handle_message(event):
     if msg == "選擇語言":
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="HI"))
 
-        reply_text = "🌐 請選擇語言："
+        reply_text = "🌐 請選擇語言io："
         quick_reply = QuickReply(items=[
             QuickReplyButton(action=MessageAction(label="繁體中文", text="語言：繁體中文")),
             QuickReplyButton(action=MessageAction(label="简体中文", text="語言：简体中文")),

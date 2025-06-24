@@ -22,13 +22,13 @@ try:
         chat_bar_text="📋 開啟主選單",
         areas=[
             RichMenuArea(bounds=RichMenuBounds(x=0, y=0, width=1250, height=843),
-                        action=MessageAction(label="我要綁定", text="我要綁定")),
+                        action=MessageAction(label="每日步數", text="每日步數")),
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=0, width=1250, height=843),
-                        action=MessageAction(label="選擇語言", text="選擇語言")),
+                        action=MessageAction(label="消耗卡路里", text="消耗卡路里")),
             RichMenuArea(bounds=RichMenuBounds(x=0, y=843, width=1250, height=843),
-                        action=MessageAction(label="查詢卡路里", text="查詢卡路里")),
+                        action=MessageAction(label="查詢心率", text="查詢心率")),
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=843, width=1250, height=843),
-                        action=MessageAction(label="教學", text="教學")),
+                        action=MessageAction(label="選擇語言", text="選擇語言")),
         ]
     )
 

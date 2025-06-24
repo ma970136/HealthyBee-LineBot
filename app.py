@@ -91,7 +91,7 @@ def get_Steps():
         if latest_today is None:
             return "⚠️ 今天尚無步數資料。"
 
-        if latest_yesterday is None:
+        elif latest_yesterday is None:
             return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
 
         today_steps = latest_today - latest_yesterday

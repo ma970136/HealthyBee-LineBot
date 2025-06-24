@@ -52,39 +52,53 @@ def get_HeartRate():
 
     return "目前沒有有效的心率資料。"
 
-def get_Steps():  # field2 為步數欄位
+def get_Steps():
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
-        return "無法從 ThingSpeak 取得資料。"
+        return "⚠️ 無法從 ThingSpeak 取得資料。"
 
     try:
         feeds = response.json().get("feeds", [])
-        
-        # 取得今天日期（UTC+8）
+        if not feeds:
+            return "⚠️ 沒有步數資料。"
+
+        # 設定時區為 UTC+8（台灣）
         now = datetime.now(timezone(timedelta(hours=8)))
         today_str = now.strftime('%Y-%m-%d')
+        yesterday_str = (now - timedelta(days=1)).strftime('%Y-%m-%d')
 
-        total_steps = 0
-        for feed in feeds:
+        latest_today = None
+        latest_yesterday = None
+
+        for feed in reversed(feeds):  # 從最新資料往前找
             created_at = feed.get("created_at")
             val = feed.get("field2")
 
             if created_at and val:
-                # 解析時間並轉換為 +8 時區
                 ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
-                if ts.strftime('%Y-%m-%d') == today_str:
-                    try:
-                        total_steps += int(float(val))
-                    except ValueError:
-                        pass
+                date_str = ts.strftime('%Y-%m-%d')
 
-        if total_steps > 0:
-            return f"👟 今日累積步數：{total_steps} 步"
-        else:
-            return "今天還沒有任何步數資料。"
+                if date_str == today_str and latest_today is None:
+                    latest_today = int(float(val))
+
+                elif date_str == yesterday_str and latest_yesterday is None:
+                    latest_yesterday = int(float(val))
+
+                # 都找到了就不用再找了
+                if latest_today is not None and latest_yesterday is not None:
+                    break
+
+        if latest_today is None:
+            return "⚠️ 今天尚無步數資料。"
+
+        if latest_yesterday is None:
+            return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
+
+        today_steps = latest_today - latest_yesterday
+        return f"👟 今日步數：{today_steps} 步\n📊 昨日累計：{latest_yesterday} 步"
 
     except Exception as e:
-        return f"⚠️ 讀取步數時發生錯誤：{e}"
+        return f"⚠️ 資料處理發生錯誤：{e}"
 
 def get_Cal(): #field3
     

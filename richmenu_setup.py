@@ -26,7 +26,7 @@ try:
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=0, width=1250, height=843),
                         action=MessageAction(label="選擇語言", text="選擇語言")),
             RichMenuArea(bounds=RichMenuBounds(x=0, y=843, width=1250, height=843),
-                        action=MessageAction(label="查詢體溫", text="查詢體溫")),
+                        action=MessageAction(label="查詢卡路里", text="查詢卡路里")),
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=843, width=1250, height=843),
                         action=MessageAction(label="教學", text="教學")),
         ]

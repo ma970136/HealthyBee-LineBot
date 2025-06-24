@@ -12,10 +12,10 @@ LANG_ID = {
 TEXT_GROUP = {
     # 🟦 欢迎
     "welcome": {
-        1: "欢迎使用血压助手！",
-        2: "歡迎使用血壓助手！",
-        3: "Welcome to BP Assistant!",
-        4: "血圧アシスタントへようこそ！"
+        1: "欢迎使用HealthyBee！",
+        2: "歡迎使用HealthyBee！",
+        3: "Welcome to HealthyBee!",
+        4: "HealthyBeeへようこそ！"
     },
 
     "set_lang_success": {

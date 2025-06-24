@@ -35,14 +35,11 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=10"
 
-
-# 抓 ThingSpeak 資料並計算平均
 def get_HeartRate(): #field1
     
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return "無法從 ThingSpeak 取得資料。"
-
     data = response.json()
     HeartRate = []
     for feed in data["feeds"]:
@@ -52,12 +49,30 @@ def get_HeartRate(): #field1
                 HeartRate.append(float(val))
             except ValueError:
                 pass
-
     if HeartRate:
         return f"您的心率為：{HeartRate}/min"
     else:
         return "目前沒有有效的心率資料。"
 
+def get_Cal(): #field2
+    
+    response = requests.get(thingspeak_url)
+    if response.status_code != 200:
+        return "無法從 ThingSpeak 取得資料。"
+    data = response.json()
+    HeartRate = []
+    for feed in data["feeds"]:
+        val = feed.get("field1")
+        if val:
+            try:
+                HeartRate.append(float(val))
+            except ValueError:
+                pass
+    if HeartRate:
+        return f"您的心率為：{HeartRate[-10:]/10}/min"
+    else:
+        return "目前沒有有效的心率資料。"
+    
 # LINE webhook endpoint
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -136,7 +151,7 @@ def handle_message(event):
 
 
     # ✅ 查心率指令
-    if "查心率" in msg:
+    if "查詢心率" in msg:
         result = get_HeartRate()
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
         return

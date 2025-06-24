@@ -152,8 +152,8 @@ def handle_message(event):
 
     # ✅ 查心率指令
     if "查詢心率" in msg:
-        result = get_HeartRate()
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="HI"))
+        result = "HI"
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result)
 
 #        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
         return

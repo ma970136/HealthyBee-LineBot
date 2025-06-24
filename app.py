@@ -59,7 +59,7 @@ def get_Steps():
     try:
         feeds = response.json().get("feeds", [])
         for feed in reversed(feeds):  # 從最新的開始找
-            val = feed.get("field2")
+            val = feed.get("field3")
             if val:
                 return f"❤️ 步數為：{int(val)} 步"
     except Exception:

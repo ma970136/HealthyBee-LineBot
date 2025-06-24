@@ -10,6 +10,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEve
 from linebot.models import QuickReply, QuickReplyButton, MessageAction
 
 from lang_text import get_text, format_bp_message, LANG_ID, check_missing_lang_keys
+from datetime import datetime, timezone, timedelta
 
 # 設定 JSON 檔案路徑
 passport_file = "user_passport.json"
@@ -42,16 +43,50 @@ def get_HeartRate():
 
     try:
         feeds = response.json().get("feeds", [])
-        heart_rates = [float(f["field1"]) for f in feeds if f.get("field1")]
-        if heart_rates:
-            avg = sum(heart_rates[-10:]) / min(10, len(heart_rates))
-            return f"🧡 最新心率平均：{avg:.1f} bpm"
+        for feed in reversed(feeds):  # 從最新的開始找
+            val = feed.get("field1")
+            if val:
+                return f"❤️ 最新心率為：{float(val):.1f} bpm"
     except Exception:
         return "⚠️ 讀取心率時發生錯誤。"
 
     return "目前沒有有效的心率資料。"
 
-def get_Cal(): #field2
+def get_Steps():  # field2 為步數欄位
+    response = requests.get(thingspeak_url)
+    if response.status_code != 200:
+        return "無法從 ThingSpeak 取得資料。"
+
+    try:
+        feeds = response.json().get("feeds", [])
+        
+        # 取得今天日期（UTC+8）
+        now = datetime.now(timezone(timedelta(hours=8)))
+        today_str = now.strftime('%Y-%m-%d')
+
+        total_steps = 0
+        for feed in feeds:
+            created_at = feed.get("created_at")
+            val = feed.get("field2")
+
+            if created_at and val:
+                # 解析時間並轉換為 +8 時區
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+                if ts.strftime('%Y-%m-%d') == today_str:
+                    try:
+                        total_steps += int(float(val))
+                    except ValueError:
+                        pass
+
+        if total_steps > 0:
+            return f"👟 今日累積步數：{total_steps} 步"
+        else:
+            return "今天還沒有任何步數資料。"
+
+    except Exception as e:
+        return f"⚠️ 讀取步數時發生錯誤：{e}"
+
+def get_Cal(): #field3
     
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
@@ -146,7 +181,11 @@ def handle_message(event):
 
     
 
-
+    # ✅ 查步數指令
+    if "每日步數" in msg:
+        result = get_Steps()
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
+        return
     # ✅ 查心率指令
     if "查詢心率" in msg:
         result = get_HeartRate()

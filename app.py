@@ -35,24 +35,21 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=10"
 
-def get_HeartRate(): #field1
-    
+def get_HeartRate():
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return "無法從 ThingSpeak 取得資料。"
-    data = response.json()
-    HeartRate = []
-    for feed in data["feeds"]:
-        val = feed.get("field1")
-        if val:
-            try:
-                HeartRate.append(float(val))
-            except ValueError:
-                pass
-    if HeartRate:
-        return f"您的心率為：{HeartRate[-10:]/10}/min"
-    else:
-        return "目前沒有有效的心率資料。"
+
+    try:
+        feeds = response.json().get("feeds", [])
+        heart_rates = [float(f["field1"]) for f in feeds if f.get("field1")]
+        if heart_rates:
+            avg = sum(heart_rates[-10:]) / min(10, len(heart_rates))
+            return f"🧡 最新心率平均：{avg:.1f} bpm"
+    except Exception:
+        return "⚠️ 讀取心率時發生錯誤。"
+
+    return "目前沒有有效的心率資料。"
 
 def get_Cal(): #field2
     

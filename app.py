@@ -63,7 +63,7 @@ def get_Steps():
             return "⚠️ 沒有步數資料。"
 
         # 設定時區為 UTC+8（台灣）
-        now = datetime.now(timezone(timedelta(hours=8)))
+        now = datetime.now(timezone(timedelta(hours=5)))
         today_str = now.strftime('%Y-%m-%d')
         yesterday_str = (now - timedelta(days=1)).strftime('%Y-%m-%d')
 

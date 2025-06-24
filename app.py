@@ -63,7 +63,7 @@ def get_Steps():
             return "⚠️ 沒有步數資料。"
 
         # 設定時區為 UTC+8（台灣）
-        now = datetime.now(timezone(timedelta(hours=5)))
+        now = datetime.now(timezone(timedelta(hours=8)))
         today_str = now.strftime('%Y-%m-%d')
         yesterday_str = (now - timedelta(days=1)).strftime('%Y-%m-%d')
 
@@ -88,12 +88,12 @@ def get_Steps():
                 if latest_today is not None and latest_yesterday is not None:
                     break
 
-        if latest_today is None:
-            return "⚠️ 今天尚無步數資料。"
+        #if latest_today is None:
+        #    return "⚠️ 今天尚無步數資料。"
 
-        elif latest_yesterday is None:
-            return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
-
+        #elif latest_yesterday is None:
+        #    return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
+        
         today_steps = latest_today - latest_yesterday
         return f"👟 今日步數：{today_steps} 步\n📊 昨日累計：{latest_yesterday} 步"
 

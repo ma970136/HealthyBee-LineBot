@@ -56,50 +56,59 @@ def get_Steps():
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return "⚠️ 無法從 ThingSpeak 取得資料。"
-
     try:
         feeds = response.json().get("feeds", [])
-        if not feeds:
-            return "⚠️ 沒有步數資料。"
-
-        # 設定時區為 UTC+8（台灣）
-        now = datetime.now(timezone(timedelta(hours=8)))
-        today_str = now.strftime('%Y-%m-%d')
-        yesterday_str = (now - timedelta(days=1)).strftime('%Y-%m-%d')
-
-        latest_today = None
-        latest_yesterday = None
-
-        for feed in reversed(feeds):  # 從最新資料往前找
-            created_at = feed.get("created_at")
+        for feed in reversed(feeds):  # 從最新的開始找
             val = feed.get("field2")
+            if val:
+                return f"❤️ 步數為：{int(val)} 步"
+    except Exception:
+        return "⚠️ 讀取步數時發生錯誤。"
 
-            if created_at and val:
-                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
-                date_str = ts.strftime('%Y-%m-%d')
+    return "目前沒有有效的步數資料。"
+    # try:
+    #     feeds = response.json().get("feeds", [])
+    #     if not feeds:
+    #         return "⚠️ 沒有步數資料。"
 
-                if date_str == today_str and latest_today is None:
-                    latest_today = int(float(val))
+    #     # 設定時區為 UTC+8（台灣）
+    #     now = datetime.now(timezone(timedelta(hours=8)))
+    #     today_str = now.strftime('%Y-%m-%d')
+    #     yesterday_str = (now - timedelta(days=1)).strftime('%Y-%m-%d')
 
-                elif date_str == yesterday_str and latest_yesterday is None:
-                    latest_yesterday = int(float(val))
+    #     latest_today = None
+    #     latest_yesterday = None
 
-                # 都找到了就不用再找了
-                if latest_today is not None and latest_yesterday is not None:
-                    break
+    #     for feed in reversed(feeds):  # 從最新資料往前找
+    #         created_at = feed.get("created_at")
+    #         val = feed.get("field2")
 
-        if latest_today is None and latest_yesterday is None:
-            return "⚠️ 今天與昨天皆無步數資料。"
-        elif latest_today is None:
-            return f"⚠️ 今天尚無步數資料。\n📊 昨日累計：{latest_yesterday} 步"
-        elif latest_yesterday is None:
-            return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
-        else:
-            today_steps = latest_today - latest_yesterday
-            return f"👟 今日步數：{today_steps} 步\n📊 昨日累計：{latest_yesterday} 步"
+    #         if created_at and val:
+    #             ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+    #             date_str = ts.strftime('%Y-%m-%d')
 
-    except Exception as e:
-        return f"⚠️ 資料處理發生錯誤：{e}"
+    #             if date_str == today_str and latest_today is None:
+    #                 latest_today = int(float(val))
+
+    #             elif date_str == yesterday_str and latest_yesterday is None:
+    #                 latest_yesterday = int(float(val))
+
+    #             # 都找到了就不用再找了
+    #             if latest_today is not None and latest_yesterday is not None:
+    #                 break
+
+    #     if latest_today is None and latest_yesterday is None:
+    #         return "⚠️ 今天與昨天皆無步數資料。"
+    #     elif latest_today is None:
+    #         return f"⚠️ 今天尚無步數資料。\n📊 昨日累計：{latest_yesterday} 步"
+    #     elif latest_yesterday is None:
+    #         return f"👣 今日總步數為：{latest_today} 步（昨日無資料）"
+    #     else:
+    #         today_steps = latest_today - latest_yesterday
+    #         return f"👟 今日步數：{today_steps} 步\n📊 昨日累計：{latest_yesterday} 步"
+
+    # except Exception as e:
+    #     return f"⚠️ 資料處理發生錯誤：{e}"
 
 def get_Cal(): #field3
     

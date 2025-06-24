@@ -50,7 +50,7 @@ def get_HeartRate(): #field1
             except ValueError:
                 pass
     if HeartRate:
-        return f"您的心率為：{HeartRate}/min"
+        return f"您的心率為：{HeartRate[-10:]/10}/min"
     else:
         return "目前沒有有效的心率資料。"
 

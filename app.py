@@ -105,9 +105,7 @@ def handle_message(event):
 
     # ✅ 選擇語言
     if msg == "選擇語言":
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="HI"))
-
-        reply_text = "🌐 請選擇語言io："
+        reply_text = "🌐 請選擇語言："
         quick_reply = QuickReply(items=[
             QuickReplyButton(action=MessageAction(label="繁體中文", text="語言：繁體中文")),
             QuickReplyButton(action=MessageAction(label="简体中文", text="語言：简体中文")),
@@ -154,10 +152,8 @@ def handle_message(event):
 
     # ✅ 查心率指令
     if "查詢心率" in msg:
-        result = "HI"
+        result = get_HeartRate()
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
-
-#        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
         return
 
     # 🟡 未匹配指令

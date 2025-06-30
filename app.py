@@ -39,6 +39,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
+    print("🟡 取得資料：", thingspeak_url)
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return None, "❌ 無法取得步數資料"
@@ -51,7 +52,6 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz).date()
     seven_days_ago = today - timedelta(days=6)
-    print(f"🟡line54")
 
     # 每天的最後一筆步數
     daily_data = {}

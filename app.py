@@ -296,17 +296,19 @@ def handle_message(event):
     #     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
     #     return
     if "每日步數" in msg:
-        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=10"
+        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=100"
 
         img_path, err = get_weekly_steps_chart(thingspeak_url)
         if err:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=err))
         else:
+            img_url = "https://healthybee-linebot.onrender.com/static/weekly_steps.png"
             image_msg = ImageSendMessage(
-                original_content_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png",
-                preview_image_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png"
+                original_content_url=img_url,
+                preview_image_url=img_url
             )
             line_bot_api.reply_message(event.reply_token, image_msg)
+        return
 
 
 

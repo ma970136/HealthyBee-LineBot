@@ -51,6 +51,7 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz).date()
     seven_days_ago = today - timedelta(days=6)
+    print(f"🟡line54")
 
     # 每天的最後一筆步數
     daily_data = {}

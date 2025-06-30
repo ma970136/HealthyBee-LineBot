@@ -62,8 +62,8 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
                 ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
                 date = ts.date()
                 if seven_days_ago <= date <= today:
-                    if date not in daily_data:
-                        daily_data[date] = int(float(val))
+                    # if date not in daily_data:
+                    daily_data[date] = int(float(val))
             except Exception:
                 continue
 
@@ -85,7 +85,7 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
 
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title('📈 Daily Steps (Last 7 days)')
+    plt.title('Daily Steps (Last 7 days)')
     plt.xlabel('Date')
     plt.ylabel('Steps')
     plt.grid(axis='y', linestyle='--', alpha=0.6)

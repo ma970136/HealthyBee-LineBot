@@ -85,9 +85,9 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
 
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title("📈 每日步數統計 (近七日)")
-    plt.xlabel("日期")
-    plt.ylabel("步數")
+    plt.title("📈 Daily Steps (Last 7 days)")
+    plt.xlabel("Date")
+    plt.ylabel("Steps")
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
     plt.savefig(image_path)

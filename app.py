@@ -1,16 +1,19 @@
 import json
 import os
 import requests
+import matplotlib.pyplot as plt
+from collections import defaultdict
 from flask import Flask, request, abort
 from dotenv import load_dotenv  # 記得 pip install python-dotenv
 
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
-from linebot.models import QuickReply, QuickReplyButton, MessageAction
+from linebot.models import QuickReply, QuickReplyButton, MessageAction, ImageSendMessage
 
 from lang_text import get_text, format_bp_message, LANG_ID, check_missing_lang_keys
 from datetime import datetime, timezone, timedelta
+app = Flask(__name__)
 
 # 設定 JSON 檔案路徑
 passport_file = "user_passport.json"
@@ -35,7 +38,65 @@ THINGSPEAK_API_KEY = os.environ.get("THINGSPEAK_API_KEY")  # 可選，如果你�
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-def get_HeartRate():
+def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
+    response = requests.get(thingspeak_url)
+    if response.status_code != 200:
+        return None, "❌ 無法取得步數資料"
+
+    feeds = response.json().get("feeds", [])
+    if not feeds:
+        return None, "⚠️ 沒有步數資料"
+
+    # 台灣時區
+    tz = timezone(timedelta(hours=8))
+    today = datetime.now(tz).date()
+    seven_days_ago = today - timedelta(days=6)
+
+    # 每天的最後一筆步數
+    daily_data = {}
+    for feed in reversed(feeds):  # 從最新的資料找
+        created_at = feed.get("created_at")
+        val = feed.get("field2")
+        if created_at and val:
+            try:
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+                date = ts.date()
+                if seven_days_ago <= date <= today:
+                    if date not in daily_data:
+                        daily_data[date] = int(float(val))
+            except Exception:
+                continue
+
+    # 補足沒有資料的日期（值為 None）
+    dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    daily_steps = []
+    prev_val = None
+    for d in dates:
+        val = daily_data.get(d)
+        if val is not None and prev_val is not None:
+            daily_steps.append(val - prev_val)
+        else:
+            daily_steps.append(0 if prev_val is not None else None)
+        prev_val = val
+
+    # 畫圖
+    x_labels = [d.strftime("%m/%d") for d in dates]
+    y_values = [v if v is not None else 0 for v in daily_steps]
+
+    plt.figure(figsize=(10, 4))
+    plt.bar(x_labels, y_values, width=0.6)
+    plt.title("📈 每日步數統計 (近七日)")
+    plt.xlabel("日期")
+    plt.ylabel("步數")
+    plt.grid(axis='y', linestyle='--', alpha=0.6)
+    plt.tight_layout()
+    plt.savefig(image_path)
+    plt.close()
+
+    return image_path, None
+
+
+def get_HeartRate(): #field1
     thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=10"
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
@@ -52,7 +113,7 @@ def get_HeartRate():
 
     return "目前沒有有效的心率資料。"
 
-def get_Steps():
+def get_Steps(): #field2
     thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=10"
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
@@ -230,10 +291,25 @@ def handle_message(event):
         return
 
     # ✅ 查步數指令
+    # if "每日步數" in msg:
+    #     result = get_Steps()
+    #     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
+    #     return
     if "每日步數" in msg:
-        result = get_Steps()
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
-        return
+        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=10"
+
+        img_path, err = get_weekly_steps_chart(thingspeak_url)
+        if err:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=err))
+        else:
+            image_msg = ImageSendMessage(
+                original_content_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png",
+                preview_image_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png"
+            )
+            line_bot_api.reply_message(event.reply_token, image_msg)
+
+
+
     # ✅ 查心率指令
     if "查詢心率" in msg:
         result = get_HeartRate()

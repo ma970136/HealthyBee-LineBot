@@ -61,9 +61,11 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
             try:
                 ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
                 date = ts.date()
-                if seven_days_ago <= date <= today:
+                print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
+
+                # if seven_days_ago <= date <= today:
                     # if date not in daily_data:
-                    daily_data[date] = int(float(val))
+                daily_data[date] = int(float(val))
             except Exception:
                 continue
 

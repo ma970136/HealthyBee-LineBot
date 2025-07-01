@@ -342,7 +342,8 @@ def handle_message(event):
         if today in daily_data:
             result = f"今天步數是：{daily_data[today]} 步"
         else:
-            result = f"今天還沒有步數資料。"
+            # result = f"今天還沒有步數資料。"
+            result = f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}"
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
 

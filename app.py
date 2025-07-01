@@ -84,9 +84,9 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     # 畫圖
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title('📈 每日步數統計 (近七日)')
-    plt.xlabel('日期')
-    plt.ylabel('步數')
+    plt.title('Daily Steps (Last 7 Days)')
+    plt.xlabel('Date')
+    plt.ylabel('Steps')
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
     plt.savefig(image_path)
@@ -308,43 +308,21 @@ def handle_message(event):
         return
 
     if "今天日期" in msg:
-        # 台灣時區
-        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=100"
-        tz = timezone(timedelta(hours=8))
-        today = datetime.now(tz).date()
-        seven_days_ago = today - timedelta(days=6)
-        response = requests.get(thingspeak_url)
-        feeds = response.json().get("feeds", [])
-        
-        # 每天的最後一筆步數
-        daily_data = {}
-        for feed in reversed(feeds):  # 從最新的資料找
-            created_at = feed.get("created_at")
-            val = feed.get("field2")
-            if created_at and val:
-                try:
-                    # 轉換為 UTC 時間
-                    utc_time = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                    utc_time = pytz.utc.localize(utc_time)  # 先標記為 UTC 時間
-                    local_time = utc_time.astimezone(tz)  # 轉換為台灣時間
+        # 台灣時區設定
+        tz = pytz.timezone('Asia/Taipei')
 
-                    date = local_time.date()
-                    print(f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{date} → 步數：{val}")
+        def get_realtime_date():
+            # 取得目前時間並轉換為台灣時區
+            now = datetime.now(tz)
+            today_str = now.strftime("%Y-%m-%d")  # 只取得日期部分
+            return today_str, now
 
-                    if seven_days_ago <= date <= today:
-                        if date not in daily_data:
-                            daily_data[date] = int(float(val))
-                except Exception as e:
-                    continue
+        # 測試
+        today, current_time = get_realtime_date()
+        print(f"今天日期是：{today}")
+        print(f"當前時間是：{current_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        
-        if today in daily_data:
-            result = f"今天步數是：{daily_data[today]} 步"
-        else:
-            # result = f"今天還沒有步數資料。"
-            result = f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{today} → 步數：{val}"
-
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
+        # line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
 
 
 

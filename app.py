@@ -324,8 +324,12 @@ def handle_message(event):
         if created_at and val:
             try:
                 # 轉換為 UTC 時間
-                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                ts = ts + timedelta(hours=8)  # 加上台灣時間差（UTC+8）
+                utc_time = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+                utc_time = pytz.utc.localize(utc_time)  # 先標記為 UTC 時間
+                local_time = utc_time.astimezone(tz)  # 轉換為台灣時間
+
+                date = local_time.date()
+                print(f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{date} → 步數：{val}")
 
                 date = ts.date()  # 得到日期
                 print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")

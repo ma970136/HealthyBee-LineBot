@@ -325,19 +325,24 @@ def handle_message(event):
         
         # 每天的最後一筆步數
         daily_data = {}
-        for feed in reversed(feeds):  # 從最新的資料找
-            created_at = feed.get("created_at")
-            val = feed.get("field2")
-            if created_at and val:
-                try:
-                    ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
-                    date = ts.date()
+    for feed in reversed(feeds):  # 從最新的資料找
+        created_at = feed.get("created_at")
+        val = feed.get("field2")
+        if created_at and val:
+            try:
+                # 轉換為 UTC 時間
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+                ts = ts + timedelta(hours=8)  # 加上台灣時間差（UTC+8）
 
-                    if seven_days_ago <= date <= today:
-                        if date not in daily_data:
-                            daily_data[date] = int(float(val))
-                except Exception:
-                    continue
+                date = ts.date()  # 得到日期
+                print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
+
+                if seven_days_ago <= date <= today:
+                    if date not in daily_data:
+                        daily_data[date] = int(float(val))
+            except Exception as e:
+                continue
+
         
         if today in daily_data:
             result = f"今天步數是：{daily_data[today]} 步"

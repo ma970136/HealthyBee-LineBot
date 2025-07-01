@@ -59,7 +59,8 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
         val = feed.get("field2")
         if created_at and val:
             try:
-                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+                ts = ts + timedelta(hours=8)  # 加上台灣時間差（UTC+8）
                 date = ts.date()
                 print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
 

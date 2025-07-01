@@ -63,9 +63,9 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
                 date = ts.date()
                 print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
 
-                # if seven_days_ago <= date <= today:
-                    # if date not in daily_data:
-                daily_data[date] = int(float(val))
+                if seven_days_ago <= date <= today:
+                    if date not in daily_data:
+                        daily_data[date] = int(float(val))
             except Exception:
                 continue
 
@@ -314,6 +314,30 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
         return
 
+    if "今天日期" in msg:
+        # 台灣時區
+        tz = timezone(timedelta(hours=8))
+        today = datetime.now(tz).date()
+        seven_days_ago = today - timedelta(days=6)
+        response = requests.get(thingspeak_url)
+        feeds = response.json().get("feeds", [])
+        # 每天的最後一筆步數
+        daily_data = {}
+        for feed in reversed(feeds):  # 從最新的資料找
+            created_at = feed.get("created_at")
+            val = feed.get("field2")
+            if created_at and val:
+                try:
+                    ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+                    date = ts.date()
+                    result = (f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
+
+                    if seven_days_ago <= date <= today:
+                        if date not in daily_data:
+                            daily_data[date] = int(float(val))
+                except Exception:
+                    continue
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
 
 
     # ✅ 查心率指令

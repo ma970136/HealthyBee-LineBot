@@ -330,7 +330,8 @@ def handle_message(event):
                 try:
                     ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
                     date = ts.date()
-                    result = f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}"
+                    # result = f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}"
+                    result = str(ts)
                     if seven_days_ago <= date <= today:
                         if date not in daily_data:
                             daily_data[date] = int(float(val))

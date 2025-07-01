@@ -318,34 +318,31 @@ def handle_message(event):
         
         # 每天的最後一筆步數
         daily_data = {}
-    for feed in reversed(feeds):  # 從最新的資料找
-        created_at = feed.get("created_at")
-        val = feed.get("field2")
-        if created_at and val:
-            try:
-                # 轉換為 UTC 時間
-                utc_time = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                utc_time = pytz.utc.localize(utc_time)  # 先標記為 UTC 時間
-                local_time = utc_time.astimezone(tz)  # 轉換為台灣時間
+        for feed in reversed(feeds):  # 從最新的資料找
+            created_at = feed.get("created_at")
+            val = feed.get("field2")
+            if created_at and val:
+                try:
+                    # 轉換為 UTC 時間
+                    utc_time = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+                    utc_time = pytz.utc.localize(utc_time)  # 先標記為 UTC 時間
+                    local_time = utc_time.astimezone(tz)  # 轉換為台灣時間
 
-                date = local_time.date()
-                print(f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{date} → 步數：{val}")
+                    date = local_time.date()
+                    print(f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{date} → 步數：{val}")
 
-                date = ts.date()  # 得到日期
-                print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
-
-                if seven_days_ago <= date <= today:
-                    if date not in daily_data:
-                        daily_data[date] = int(float(val))
-            except Exception as e:
-                continue
+                    if seven_days_ago <= date <= today:
+                        if date not in daily_data:
+                            daily_data[date] = int(float(val))
+                except Exception as e:
+                    continue
 
         
         if today in daily_data:
             result = f"今天步數是：{daily_data[today]} 步"
         else:
             # result = f"今天還沒有步數資料。"
-            result = f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{today} → 步數：{val}"
+            result = f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{today} → 步數：{val}"
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
 

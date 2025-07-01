@@ -39,7 +39,6 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
-    print("🟡 取得資料：", thingspeak_url)
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return None, "❌ 無法取得步數資料"
@@ -311,6 +310,8 @@ def handle_message(event):
                 preview_image_url=img_url
             )
             line_bot_api.reply_message(event.reply_token, image_msg)
+        result = get_Steps()
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
         return
 
 

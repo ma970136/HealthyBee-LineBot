@@ -49,13 +49,29 @@ THINGSPEAK_API_KEY = os.environ.get("THINGSPEAK_API_KEY")  # 可選，如果你�
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
-    today, current_time = get_realtime_date()
-    # print(f"今天日期是：{today}")
-    # print(f"當前時間是：{current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    seven_days_ago = datetime.now(tz).date() - timedelta(days=6)
+from datetime import datetime, timedelta
+import pytz
 
-    response = requests.get(thingspeak_url)
+# 台灣時區設定
+tz = pytz.timezone('Asia/Taipei')
+
+# 取得實時日期（今天）
+def get_realtime_date():
+    now = datetime.now(tz)
+    today_str = now.strftime("%Y-%m-%d")  # 只取得日期部分
+    return today_str, now
+
+# 取得近七天步數資料並畫圖
+def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
+    # 取得今天日期
+    today, current_time = get_realtime_date()
+
+    # 計算最近七天的日期範圍
+    today = datetime.now(tz).date()  # 確保 `today` 是 datetime.date 類型
+    seven_days_ago = today - timedelta(days=6)  # 計算七天前
+
+    # 取得資料
+    response = requests.get(f"{thingspeak_url}?results=100")  # 可以增加結果數量
     if response.status_code != 200:
         return None, "❌ 無法取得步數資料"
 
@@ -75,38 +91,33 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
                 ts = pytz.utc.localize(ts)  # 設定為 UTC 時區
                 local_time = ts.astimezone(tz)  # 轉換為台灣時間
 
-                date = local_time.date()
+                date = local_time.date()  # 取得資料日期，確保是 `datetime.date()` 類型
 
-                # 只儲存最近 7 天的資料
+                # 確保 date, seven_days_ago 和 today 都是 `datetime.date()` 類型
                 if seven_days_ago <= date <= today:
-                    daily_data[date] = int(float(val))
+                    if date not in daily_data:
+                        daily_data[date] = int(float(val))
             except Exception as e:
                 continue
 
-    # 輸出最近七天的步數資料
-    result = {}
-    for i in range(7):
-        date_to_check = today - timedelta(days=i)
-        steps = daily_data.get(date_to_check, 0)  # 若無資料則設為 0
-        result[date_to_check] = steps
-
     # 計算 X 軸與 Y 軸的資料
-    dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    dates = [today - timedelta(days=i) for i in range(6, -1, -1)]  # 近七天的日期
     x_labels = [d.strftime("%m/%d") for d in dates]
     y_values = [daily_data.get(d, 0) for d in dates]
 
     # 畫圖
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title('Daily Steps(Last 7 Days)')
-    plt.xlabel('Date')
-    plt.ylabel('Steps')
+    plt.title('📈 每日步數統計 (近七日)')
+    plt.xlabel('日期')
+    plt.ylabel('步數')
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
     plt.savefig(image_path)
     plt.close()
 
     return image_path, daily_data
+
 
 
 def get_HeartRate(): #field1

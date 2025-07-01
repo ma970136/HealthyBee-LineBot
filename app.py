@@ -52,51 +52,39 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     today = datetime.now(tz).date()
     seven_days_ago = today - timedelta(days=6)
 
-    # 每天的最後一筆步數
+    # 每天的最後一筆步數資料
     daily_data = {}
     for feed in reversed(feeds):  # 從最新的資料找
         created_at = feed.get("created_at")
         val = feed.get("field2")
         if created_at and val:
             try:
-                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                ts = ts + timedelta(hours=8)  # 加上台灣時間差（UTC+8）
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
                 date = ts.date()
-                print(f"🟡 取得資料：{created_at} → 台灣時間：{ts} → 日期：{date} → 步數：{val}")
-
                 if seven_days_ago <= date <= today:
                     if date not in daily_data:
                         daily_data[date] = int(float(val))
             except Exception:
                 continue
 
-    # 補足沒有資料的日期（值為 None）
+    # 計算 X 軸與 Y 軸的資料
     dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
-    daily_steps = []
-    prev_val = None
-    for d in dates:
-        val = daily_data.get(d)
-        if val is not None and prev_val is not None:
-            daily_steps.append(val - prev_val)
-        else:
-            daily_steps.append(0 if prev_val is not None else None)
-        prev_val = val
+    x_labels = [d.strftime("%m/%d") for d in dates]
+    y_values = [daily_data.get(d, 0) for d in dates]
 
     # 畫圖
-    x_labels = [d.strftime("%m/%d") for d in dates]
-    y_values = [v if v is not None else 0 for v in daily_steps]
-
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title('Daily Steps (Last 7 days)')
-    plt.xlabel('Date')
-    plt.ylabel('Steps')
+    plt.title('📈 每日步數統計 (近七日)')
+    plt.xlabel('日期')
+    plt.ylabel('步數')
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
     plt.savefig(image_path)
     plt.close()
 
     return image_path, None
+
 
 
 def get_HeartRate(): #field1
@@ -294,10 +282,6 @@ def handle_message(event):
         return
 
     # ✅ 查步數指令
-    # if "每日步數" in msg:
-    #     result = get_Steps()
-    #     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
-    #     return
     if "每日步數" in msg:
         thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=100"
 

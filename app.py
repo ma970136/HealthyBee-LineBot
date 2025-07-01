@@ -17,6 +17,15 @@ from lang_text import get_text, format_bp_message, LANG_ID, check_missing_lang_k
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 
+# 台灣時區設定
+tz = pytz.timezone('Asia/Taipei')
+
+# 取得當前日期和時間
+def get_realtime_date():
+    now = datetime.now(tz)  # 取得台灣當前時間
+    today_str = now.strftime("%Y-%m-%d")  # 只取得日期部分
+    return today_str, now
+
 # 設定 JSON 檔案路徑
 passport_file = "user_passport.json"
 
@@ -41,6 +50,14 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
+    # 取得當前時間
+    today, current_time = get_realtime_date()
+    
+    # 設定台灣時區
+    tz = pytz.timezone('Asia/Taipei')
+    today = datetime.now(tz).date()
+    seven_days_ago = today - timedelta(days=6)
+    
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return None, "❌ 無法取得步數資料"
@@ -48,11 +65,6 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     feeds = response.json().get("feeds", [])
     if not feeds:
         return None, "⚠️ 沒有步數資料"
-
-    # 台灣時區設定
-    tz = pytz.timezone('Asia/Taipei')
-    today = datetime.now(tz).date()
-    seven_days_ago = today - timedelta(days=6)
 
     # 每天的最後一筆步數資料
     daily_data = {}
@@ -62,18 +74,15 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
         if created_at and val:
             try:
                 # 解析 UTC 時間並轉換為台灣時間
-                utc_time = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                utc_time = pytz.utc.localize(utc_time)  # 先標記為 UTC 時間
-                local_time = utc_time.astimezone(tz)  # 轉換為台灣時間
+                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+                ts = pytz.utc.localize(ts)  # 設定為 UTC 時區
+                local_time = ts.astimezone(tz)  # 轉換為台灣時間
 
                 date = local_time.date()
-                print(f"🟡 取得資料：{created_at} → 台灣時間：{local_time} → 日期：{date} → 步數：{val}")
-
                 if seven_days_ago <= date <= today:
                     if date not in daily_data:
                         daily_data[date] = int(float(val))
             except Exception as e:
-                print(f"⚠️ 錯誤：{e}")
                 continue
 
     # 計算 X 軸與 Y 軸的資料
@@ -84,15 +93,15 @@ def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.
     # 畫圖
     plt.figure(figsize=(10, 4))
     plt.bar(x_labels, y_values, width=0.6)
-    plt.title('Daily Steps (Last 7 Days)')
-    plt.xlabel('Date')
-    plt.ylabel('Steps')
+    plt.title('📈 每日步數統計 (近七日)')
+    plt.xlabel('日期')
+    plt.ylabel('步數')
     plt.grid(axis='y', linestyle='--', alpha=0.6)
     plt.tight_layout()
     plt.savefig(image_path)
     plt.close()
 
-    return image_path, None
+    return image_path, f"📅 今天日期是：{today}\n⏰ 當前時間是：{current_time.strftime('%Y-%m-%d %H:%M:%S')}"
 
 
 def get_HeartRate(): #field1
@@ -291,21 +300,20 @@ def handle_message(event):
 
     # ✅ 查步數指令
     if "每日步數" in msg:
-        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=100"
+        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json"
+        img_path, message = get_weekly_steps_chart(thingspeak_url)
 
-        img_path, err = get_weekly_steps_chart(thingspeak_url)
-        if err:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=err))
-        else:
-            img_url = "https://healthybee-linebot.onrender.com/static/weekly_steps.png"
-            image_msg = ImageSendMessage(
-                original_content_url=img_url,
-                preview_image_url=img_url
-            )
-            line_bot_api.reply_message(event.reply_token, image_msg)
-        result = get_Steps()
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
-        return
+        # 發送圖片與日期時間訊息
+        line_bot_api.reply_message(
+            event.reply_token,
+            [
+                TextSendMessage(text=message),
+                ImageSendMessage(
+                    original_content_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png",
+                    preview_image_url="https://healthybee-linebot.onrender.com/static/weekly_steps.png"
+                )
+            ]
+        )
 
     if "今天日期" in msg:
         # 台灣時區設定

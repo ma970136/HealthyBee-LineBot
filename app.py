@@ -316,6 +316,7 @@ def handle_message(event):
 
     if "今天日期" in msg:
         # 台灣時區
+        thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=100"
         tz = timezone(timedelta(hours=8))
         today = datetime.now(tz).date()
         seven_days_ago = today - timedelta(days=6)

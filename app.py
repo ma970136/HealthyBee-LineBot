@@ -2,7 +2,6 @@ import json
 import os
 import requests
 import matplotlib.pyplot as plt
-import pytz
 
 from collections import defaultdict
 from flask import Flask, request, abort
@@ -16,15 +15,6 @@ from linebot.models import QuickReply, QuickReplyButton, MessageAction, ImageSen
 from lang_text import get_text, format_bp_message, LANG_ID, check_missing_lang_keys
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
-
-# 台灣時區設定
-tz = pytz.timezone('Asia/Taipei')
-
-# 取得當前日期和時間
-def get_realtime_date():
-    now = datetime.now(tz)  # 取得台灣當前時間
-    today_str = now.strftime("%Y-%m-%d")  # 只取得日期部分
-    return today_str, now
 
 # 設定 JSON 檔案路徑
 passport_file = "user_passport.json"
@@ -48,77 +38,6 @@ THINGSPEAK_API_KEY = os.environ.get("THINGSPEAK_API_KEY")  # 可選，如果你�
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
-from datetime import datetime, timedelta
-import pytz
-
-# 台灣時區設定
-tz = pytz.timezone('Asia/Taipei')
-
-# 取得實時日期（今天）
-def get_realtime_date():
-    now = datetime.now(tz)
-    today_str = now.strftime("%Y-%m-%d")  # 只取得日期部分
-    return today_str, now
-
-# 取得近七天步數資料並畫圖
-def get_weekly_steps_chart(thingspeak_url: str, image_path="static/weekly_steps.png"):
-    # 取得今天日期
-    today, current_time = get_realtime_date()
-
-    # 計算最近七天的日期範圍
-    today = datetime.now(tz).date()  # 確保 `today` 是 datetime.date 類型
-    seven_days_ago = today - timedelta(days=6)  # 計算七天前
-
-    # 取得資料
-    response = requests.get(f"{thingspeak_url}?results=500")  # 可以增加結果數量
-    if response.status_code != 200:
-        return None, "❌ 無法取得步數資料"
-
-    feeds = response.json().get("feeds", [])
-    if not feeds:
-        return None, "⚠️ 沒有步數資料"
-
-    # 每天的最後一筆步數資料
-    daily_data = {}
-    for feed in reversed(feeds):  # 從最新的資料找
-        created_at = feed.get("created_at")
-        val = feed.get("field2")  # 假設步數是 field2
-        if created_at and val:
-            try:
-                # 解析 UTC 時間並轉換為台灣時間
-                ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
-                ts = pytz.utc.localize(ts)  # 設定為 UTC 時區
-                local_time = ts.astimezone(tz)  # 轉換為台灣時間
-
-                date = local_time.date()  # 取得資料日期，確保是 `datetime.date()` 類型
-
-                # 確保 date, seven_days_ago 和 today 都是 `datetime.date()` 類型
-                if seven_days_ago <= date <= today:
-                    if date not in daily_data:
-                        daily_data[date] = int(float(val))
-            except Exception as e:
-                continue
-
-    # 計算 X 軸與 Y 軸的資料
-    dates = [today - timedelta(days=i) for i in range(6, -1, -1)]  # 近七天的日期
-    x_labels = [d.strftime("%m/%d") for d in dates]
-    y_values = [daily_data.get(d, 0) for d in dates]
-
-    # 畫圖
-    plt.figure(figsize=(10, 4))
-    plt.bar(x_labels, y_values, width=0.6)
-    plt.title('📈 每日步數統計 (近七日)')
-    plt.xlabel('日期')
-    plt.ylabel('步數')
-    plt.grid(axis='y', linestyle='--', alpha=0.6)
-    plt.tight_layout()
-    plt.savefig(image_path)
-    plt.close()
-
-    return image_path, daily_data
-
-
 
 def get_HeartRate(): #field1
     thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=10"
@@ -383,15 +302,6 @@ def handle_message(event):
             ]
         )
 
-    if "今天日期" in msg:
-        # 測試
-        today, current_time = get_realtime_date()
-        print(f"今天日期是：{today}")
-        print(f"當前時間是：{current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-        # line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
-
-
 
     # ✅ 查心率指令
     if "查詢心率" in msg:
@@ -400,7 +310,7 @@ def handle_message(event):
         return
 
     # 🟡 未匹配指令
-    reply_text = "請輸入『查詢心率』或『消耗卡路里』等指令來使用功能。"
+    reply_text = "請輸入『查詢心率』、『每日步數』或『消耗卡路里』等指令來使用功能。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
 
 

@@ -40,7 +40,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_HeartRate(): #field1
-    thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=10"
+    thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/1.json?results=100"
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
         return "無法從 ThingSpeak 取得資料。"
@@ -50,7 +50,11 @@ def get_HeartRate(): #field1
         for feed in reversed(feeds):  # 從最新的開始找
             val = feed.get("field1")
             if val:
-                return f"❤️ 最新心率為：{float(val):.1f} bpm"
+                heart_rate = float(val)
+                if heart_rate == 0:
+                    continue  # 如果是 0，繼續檢查下一筆資料
+                else:
+                    return f"❤️ 最新心率為：{heart_rate:.1f} bpm"  # 找到非 0 的心率就返回
     except Exception:
         return "⚠️ 讀取心率時發生錯誤。"
 
@@ -71,7 +75,7 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
         now = datetime.now(timezone(timedelta(hours=8)))
         week_str = []
         latest_data_everyday = []
-        for i in range(10):
+        for i in range(7):
             week_str.append((now - timedelta(days=i)).strftime('%Y-%m-%d'))
             latest_data_everyday.append(None)
 
@@ -82,23 +86,21 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
             if created_at and val:
                 ts = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
                 date_str = ts.strftime('%Y-%m-%d')
-                # print("R",week_str[1],latest_data_everyday[1])
 
-                for i in range(10):
+                for i in range(7):
                     if date_str == week_str[i] and latest_data_everyday[i] is None:
                         latest_data_everyday[i] = int(float(val))
 
                 # 都找到了就不用再找了
-        for i in range(10):
+        for i in range(7):
             if latest_data_everyday[i] is None:
                 latest_data_everyday[i] = 0
         return_result = ""
-        for i in range(10):  # 從 0 到 6，共 7 天
+        for i in range(7):  # 從 0 到 6，共 7 天
             return_result += f"{week_str[i]} 走了 {latest_data_everyday[i]} 步\n"
 
 
         # 計算 X 軸與 Y 軸的資料
-        # dates = [week_str]  # 近10天的日期
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
         y_values = (latest_data_everyday)[::-1]
 
@@ -110,7 +112,7 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
             
             plt.text(bar.get_x() + bar.get_width() / 2, yval,  # 顯示在每個長條上方
                     f'{int(yval)}', ha='center', va='bottom', fontsize=10)  # 調整文字位置和大小
-        plt.title('Daily Steps (Last 10 Days)')
+        plt.title('Daily Steps (Last 7 Days)')
         plt.xlabel('Date')
         plt.ylabel('Steps')
         plt.grid(axis='y', linestyle='--', alpha=0.6)
@@ -142,7 +144,7 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
         now = datetime.now(timezone(timedelta(hours=8)))
         week_str = []
         latest_data_everyday = []
-        for i in range(10):
+        for i in range(7):
             week_str.append((now - timedelta(days=i)).strftime('%Y-%m-%d'))
             latest_data_everyday.append(None)
 
@@ -155,21 +157,20 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
                 date_str = ts.strftime('%Y-%m-%d')
                 # print("R",week_str[1],latest_data_everyday[1])
 
-                for i in range(10):
+                for i in range(7):
                     if date_str == week_str[i] and latest_data_everyday[i] is None:
                         latest_data_everyday[i] = int(float(val))
 
                 # 都找到了就不用再找了
-        for i in range(10):
+        for i in range(7):
             if latest_data_everyday[i] is None:
                 latest_data_everyday[i] = 0
         return_result = ""
-        for i in range(10):
-            return_result += f"{week_str[i]} 消耗了 {latest_data_everyday[i]} kcal\n"
+        for i in range(7):
+            return_result += f"{week_str[i]} 消耗了 {latest_data_everyday[i]} cal\n"
 
 
         # 計算 X 軸與 Y 軸的資料
-        # dates = [week_str]  # 近10天的日期
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
         y_values = (latest_data_everyday)[::-1]
 
@@ -181,9 +182,9 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
             
             plt.text(bar.get_x() + bar.get_width() / 2, yval,  # 顯示在每個長條上方
                     f'{int(yval)}', ha='center', va='bottom', fontsize=10)  # 調整文字位置和大小
-        plt.title('Daily Calories (Last 10 Days)')
+        plt.title('Daily Calories (Last 7 Days)')
         plt.xlabel('Date')
-        plt.ylabel('Calories(kcal)')
+        plt.ylabel('Calories(cal)')
         plt.grid(axis='y', linestyle='--', alpha=0.6)
         plt.tight_layout()
         plt.savefig(image_path)

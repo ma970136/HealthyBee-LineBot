@@ -3,10 +3,10 @@
 This is a LINE chatbot for elderly health management.
 
 - 📝 Features:
-  - Passport ID binding
-  - Multi-language quick menu
-  - Health data upload to ThingSpeak
-  - Rich Menu UI with 4 buttons (bind, language, query, help)
+  - Heart rate query
+  - Steps count query
+  - Calories consumption tracking
+  - Multi-language selection
 
 - 🟡 Deployment: [Render link](https://healthybee-linebot.onrender.com)
 

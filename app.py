@@ -269,6 +269,8 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
         return
     
+    lang_id = lang_data.get(user_id, 2)  # 預設為繁體中文
+
     # ✅ 查詢卡路里
     if "消耗卡路里" in msg:
         img_path, message = get_Cal()
@@ -307,7 +309,7 @@ def handle_message(event):
     # ✅ 查心率指令
     if "查詢心率" in msg:
         result = get_HeartRate()
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("bp_prefix", lang_id) + result))
         return
 
     # 🟡 未匹配指令

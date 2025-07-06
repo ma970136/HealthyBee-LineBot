@@ -97,8 +97,9 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
                 latest_data_everyday[i] = 0
         return_result = ""
         for i in range(7):  # 從 0 到 6，共 7 天
-            return_result += f"{week_str[i]} 走了 {latest_data_everyday[i]} 步\n"
-
+            return_result += f"{week_str[i]} 走了 {latest_data_everyday[i]} 步"
+            if i != 6:
+                return_result += "\n"
 
         # 計算 X 軸與 Y 軸的資料
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
@@ -167,7 +168,9 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
                 latest_data_everyday[i] = 0
         return_result = ""
         for i in range(7):
-            return_result += f"{week_str[i]} 消耗了 {latest_data_everyday[i]} cal\n"
+            return_result += f"{week_str[i]} 消耗了 {latest_data_everyday[i]} cal"
+            if i != 6:
+                return_result += "\n"
 
 
         # 計算 X 軸與 Y 軸的資料
@@ -215,7 +218,34 @@ def home():
 
 @handler.add(FollowEvent)
 def handle_follow(event):
-    welcome_msg = "🐝 歡迎加入 HealthyBee！\n"
+    user_id = event.source.user_id
+
+    # 嘗試讀取語言設定，若不存在則使用預設語言（繁體中文）
+    try:
+        with open("user_lang.json", "r", encoding="utf-8") as f:
+            lang_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        lang_data = {}  # 若檔案不存在或格式錯誤，使用空字典
+
+    # 嘗試獲取用戶的手機語言設定（默認為繁體中文）
+    try:
+        user_profile = line_bot_api.get_profile(user_id)
+        user_language = user_profile.language  # 這將返回用戶手機語言，例如 "zh-TW", "en", "ja"
+    except Exception as e:
+        user_language = "zh-TW"  # 如果獲取語言失敗，默認使用繁體中文
+    
+    # 根據用戶手機語言設定來決定語言 ID
+    lang_map = {
+        "zh-TW": 2,  # 繁體中文
+        "zh-CN": 1,  # 簡體中文
+        "en": 3,     # 英文
+        "ja": 4      # 日文
+    }
+    lang_id = lang_map.get(user_language, 2)  # 默認為繁體中文
+
+    # 根據語言返回歡迎訊息
+    welcome_msg = get_text("welcome", lang_id)  # 從 lang_text.py 中獲取對應語言的歡迎訊息
+
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=welcome_msg)

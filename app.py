@@ -54,7 +54,7 @@ def get_HeartRate(): #field1
                 if heart_rate == 0:
                     continue  # 如果是 0，繼續檢查下一筆資料
                 else:
-                    return f"❤️ 最新心率為：{heart_rate:.1f} bpm"  # 找到非 0 的心率就返回
+                    return f"❤️{heart_rate:.1f} bpm"  # 找到非 0 的心率就返回
     except Exception:
         return "⚠️ 讀取心率時發生錯誤。"
 
@@ -235,7 +235,7 @@ def handle_message(event):
      
     # 預設語言為繁體中文 (lang_id = 2)
     lang_id = lang_data.get(user_id, 2)
-    
+
     # ✅ 選擇語言
     if msg == "選擇語言":
         reply_text = "🌐 請選擇語言："

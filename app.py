@@ -226,7 +226,16 @@ def handle_follow(event):
 def handle_message(event):
     user_id = event.source.user_id
     msg = event.message.text.strip()
-
+    # 嘗試讀取語言設定，若不存在則使用預設語言（繁體中文）
+    try:
+        with open("user_lang.json", "r", encoding="utf-8") as f:
+            lang_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        lang_data = {}  # 若檔案不存在或格式錯誤，使用空字典
+     
+    # 預設語言為繁體中文 (lang_id = 2)
+    lang_id = lang_data.get(user_id, 2)
+    
     # ✅ 選擇語言
     if msg == "選擇語言":
         reply_text = "🌐 請選擇語言："
@@ -242,6 +251,9 @@ def handle_message(event):
             TextSendMessage(text=reply_text, quick_reply=quick_reply)
         )
         return
+    
+
+
     # 儲存語言設定
     lang_map = {
         "語言：简体中文": 1,

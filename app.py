@@ -232,7 +232,7 @@ def handle_follow(event):
         user_profile = line_bot_api.get_profile(user_id)
         user_language = user_profile.language  # 這將返回用戶手機語言，例如 "zh-TW", "en", "ja"
     except Exception as e:
-        user_language = "zh-TW"  # 如果獲取語言失敗，默認使用繁體中文
+        user_language = "en"  # 如果獲取語言失敗，默認使用繁體中文
     
     # 根據用戶手機語言設定來決定語言 ID
     lang_map = {

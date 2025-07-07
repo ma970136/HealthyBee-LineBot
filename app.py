@@ -60,7 +60,7 @@ def get_HeartRate(): #field1
 
     return "目前沒有有效的心率資料。"
 
-def get_Steps(image_path="static/weekly_steps.png"): #field2
+def get_Steps(image_path="static/weekly_steps.png", langID=3): #field2
     thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=1000"
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
@@ -101,7 +101,7 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
             if i != 6:
                 return_result += "\n"
         
-        result = format_steps_message(2, week_str, latest_data_everyday)
+        result = format_steps_message(langID, week_str, latest_data_everyday)
 
         # 計算 X 軸與 Y 軸的資料
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
@@ -124,7 +124,7 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
         plt.show()
         plt.close()
 
-        print(return_result)
+        print(result)
         return image_path, result
     except Exception as e:
         print(f"⚠️ 資料處理發生錯誤：{e}")
@@ -336,7 +336,7 @@ def handle_message(event):
     # ✅ 查步數指令
     if "每日步數" in msg:
         thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=1000"
-        img_path, message = get_Steps()
+        img_path, message = get_Steps(langID=lang_id)
         # 發送圖片與日期時間訊息
         line_bot_api.reply_message(
             event.reply_token,

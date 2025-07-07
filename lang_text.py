@@ -162,7 +162,7 @@ TEXT_GROUP = {
     4: "消費した"  # 日本語
 },
 
-"卡路里": {
+"cal": {
     1: "卡路里",  # 简体中文
     2: "卡路里",  # 繁體中文
     3: "cal",     # English
@@ -255,8 +255,8 @@ def format_calories_message(lang_id: int, dates: list, calories: list) -> str:
     
     # 翻譯 "消耗了" 和 "cal" 兩個字
     burned_text = get_text("消耗了", lang_id)  # 根據語言ID翻譯“消耗了”
-    calorie_text = get_text("cal", lang_id)    # 根據語言ID翻譯“cal”
-
+    # calorie_text = get_text("cal", lang_id)    # 根據語言ID翻譯“cal”
+    calorie_text = "cal"
     # 組合步數信息
     for date, calorie in zip(dates, calories):
         result += f"{date} {burned_text} {calorie} {calorie_text}\n"

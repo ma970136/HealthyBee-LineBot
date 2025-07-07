@@ -189,6 +189,29 @@ def format_bp_message(lang_id: int, value_str: str, level: str) -> str:
     body = get_text(f"bp_{level}", lang_id)
     return f"{prefix} {value_str}\n{body}"
 
+def format_steps_message(lang_id: int, dates: list, steps: list) -> str:
+    """
+    生成七天步數查詢結果
+    参数:
+        lang_id: 语言编号 (1~4)
+        dates: 日期列表，例如 ["2025-07-07", "2025-07-06", ...]
+        steps: 步數列表，例如 [0, 0, 20, 0, 0, 40]
+    
+    返回:
+        返回完整的步數查詢訊息，包含翻譯後的文字
+    """
+    result = ""
+    
+    # 翻譯 "走了" 和 "步" 兩個字
+    walked_text = get_text("走了", lang_id)  # 這裡會根據語言返回 "走了"、"歩いた"、"walked"
+    step_text = get_text("步", lang_id)      # 這裡會根據語言返回 "步"、"歩"、"steps"
+    
+    # 迴圈組合結果
+    for date, step in zip(dates, steps):
+        result += f"{date} {walked_text} {step} {step_text}\n"
+    
+    return result.strip()  # 去除最後的換行符
+
 # ✅ 检查是否缺失某语言的文案
 def check_missing_lang_keys():
     for key, values in TEXT_GROUP.items():

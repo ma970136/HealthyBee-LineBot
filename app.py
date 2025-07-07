@@ -12,7 +12,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
 from linebot.models import QuickReply, QuickReplyButton, MessageAction, ImageSendMessage
 
-from lang_text import get_text, format_bp_message, LANG_ID, check_missing_lang_keys
+from lang_text import get_text, format_bp_message, format_steps_message, LANG_ID, check_missing_lang_keys
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 
@@ -100,6 +100,8 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
             return_result += f"{week_str[i]} 走了 {latest_data_everyday[i]} 步"
             if i != 6:
                 return_result += "\n"
+        
+        result = format_steps_message(2, week_str, latest_data_everyday)
 
         # 計算 X 軸與 Y 軸的資料
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
@@ -123,7 +125,7 @@ def get_Steps(image_path="static/weekly_steps.png"): #field2
         plt.close()
 
         print(return_result)
-        return image_path, return_result
+        return image_path, result
     except Exception as e:
         print(f"⚠️ 資料處理發生錯誤：{e}")
         return f"⚠️ 資料處理發生錯誤：{e}"
@@ -355,8 +357,7 @@ def handle_message(event):
         return
 
     # 🟡 未匹配指令
-    reply_text = "請輸入『查詢心率』、『每日步數』或『消耗卡路里』等指令來使用功能。"
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("unknown_command", lang_id)))
 
 
 

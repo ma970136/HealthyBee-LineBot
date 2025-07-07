@@ -12,7 +12,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
 from linebot.models import QuickReply, QuickReplyButton, MessageAction, ImageSendMessage
 
-from lang_text import get_text, format_bp_message, format_steps_message, LANG_ID, check_missing_lang_keys
+from lang_text import get_text, format_bp_message, format_steps_message, format_calories_message, LANG_ID, check_missing_lang_keys
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 
@@ -132,7 +132,7 @@ def get_Steps(image_path="static/weekly_steps.png", langID=3): #field2
 # thingspeak_url_test = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=1000"
 img_path, message = get_Steps()
 # get_Steps()
-def get_Cal(image_path="static/weekly_Cal.png"): #field3
+def get_Cal(image_path="static/weekly_Cal.png", langID=3): #field3
     thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/3.json?results=1000"
     response = requests.get(thingspeak_url)
     if response.status_code != 200:
@@ -174,6 +174,7 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
             if i != 6:
                 return_result += "\n"
 
+        result = format_calories_message(langID, week_str, latest_data_everyday)
 
         # 計算 X 軸與 Y 軸的資料
         x_labels = ([datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d") for d in week_str])[::-1]
@@ -196,8 +197,8 @@ def get_Cal(image_path="static/weekly_Cal.png"): #field3
         plt.show()
         plt.close()
 
-        print(return_result)
-        return image_path, return_result
+        print(result)
+        return image_path, result
     except Exception as e:
         print(f"⚠️ 資料處理發生錯誤：{e}")
         return f"⚠️ 資料處理發生錯誤：{e}"
@@ -317,7 +318,7 @@ def handle_message(event):
 
     # ✅ 查詢卡路里
     if "消耗卡路里" in msg:
-        img_path, message = get_Cal()
+        img_path, message = get_Cal(langID=lang_id)
         # 發送圖片與日期時間訊息
         line_bot_api.reply_message(
             event.reply_token,

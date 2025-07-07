@@ -154,6 +154,21 @@ TEXT_GROUP = {
     3: "No",
     4: "いいえ"
 },
+ # 🟨 卡路里文案
+"burned": {
+    1: "消耗了",   # 简体中文
+    2: "消耗了",   # 繁體中文
+    3: "burned",   # English
+    4: "消費した"  # 日本語
+},
+
+"calories": {
+    1: "卡路里",  # 简体中文
+    2: "卡路里",  # 繁體中文
+    3: "cal",     # English
+    4: "カロリー"  # 日本語
+},
+# 🟩 步数相关文案
 "走了": {
     1: "走了",        # 简体中文
     2: "走了",        # 繁體中文
@@ -200,6 +215,7 @@ def format_bp_message(lang_id: int, value_str: str, level: str) -> str:
     body = get_text(f"bp_{level}", lang_id)
     return f"{prefix} {value_str}\n{body}"
 
+# ✅ 步數文案组合函数
 def format_steps_message(lang_id: int, dates: list, steps: list) -> str:
     """
     生成七天步數查詢結果
@@ -222,6 +238,30 @@ def format_steps_message(lang_id: int, dates: list, steps: list) -> str:
         result += f"{date} {walked_text} {step} {step_text}\n"
     
     return result.strip()  # 去除最後的換行符
+
+# ✅ 卡路里文案组合函数
+def format_calories_message(lang_id: int, dates: list, calories: list) -> str:
+    """
+    格式化卡路里消耗訊息，並根據語言 ID 返回對應的消息
+    参数:
+        lang_id: 语言编号 (1~4)
+        dates: 日期列表，例如 ["2025-07-07", "2025-07-06", ...]
+        calories: 卡路里消耗列表，例如 [0, 0, 20, 0, 0, 40]
+    
+    返回:
+        返回完整的卡路里消耗查詢訊息，包含翻譯後的文字
+    """
+    result = ""
+    
+    # 翻譯 "消耗了" 和 "cal" 兩個字
+    burned_text = get_text("消耗了", lang_id)  # 根據語言ID翻譯“消耗了”
+    calorie_text = get_text("cal", lang_id)    # 根據語言ID翻譯“cal”
+
+    # 組合步數信息
+    for date, calorie in zip(dates, calories):
+        result += f"{date} {burned_text} {calorie} {calorie_text}\n"
+    
+    return result.strip()  # 返回格式化後的結果
 
 # ✅ 检查是否缺失某语言的文案
 def check_missing_lang_keys():

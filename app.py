@@ -358,7 +358,7 @@ def handle_message(event):
         return
 
     # 🟡 未匹配指令
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("unknown_command", lang_id)))
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("unknown_command", lang_id)+get_text("help", lang_id)))
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("help", lang_id)))
 
 

@@ -12,7 +12,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
 from linebot.models import QuickReply, QuickReplyButton, MessageAction, ImageSendMessage
 
-from lang_text import get_text, format_bp_message, format_steps_message, format_calories_message, LANG_ID, check_missing_lang_keys
+from lang_text import get_text, format_steps_message, format_calories_message, LANG_ID, check_missing_lang_keys
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 
@@ -359,6 +359,7 @@ def handle_message(event):
 
     # 🟡 未匹配指令
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("unknown_command", lang_id)))
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("help", lang_id)))
 
 
 

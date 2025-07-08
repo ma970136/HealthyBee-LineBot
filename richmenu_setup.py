@@ -2,6 +2,8 @@ from linebot import LineBotApi
 from linebot.models import RichMenu, RichMenuArea, RichMenuBounds, MessageAction
 from dotenv import load_dotenv
 import os
+from lang_text import get_text, format_steps_message, format_calories_message, LANG_ID, check_missing_lang_keys
+import json
 
 # 載入 .env 的 Channel Access Token
 load_dotenv()
@@ -12,7 +14,15 @@ if not channel_token:
     exit()
 
 line_bot_api = LineBotApi(channel_token)
-
+# 讀取用戶的語言設定
+def get_user_language(user_id: str) -> int:
+    try:
+        with open("user_lang.json", "r", encoding="utf-8") as f:
+            lang_data = json.load(f)
+        return lang_data.get(user_id, 2)  # 如果找不到該用戶的設定，預設為繁體中文 (lang_id = 2)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 2  # 如果檔案不存在或讀取錯誤，預設為繁體中文
+lang_id = get_user_language()
 try:
     # Step 1: 建立 Rich Menu 設定
     rich_menu = RichMenu(
@@ -22,13 +32,13 @@ try:
         chat_bar_text="📋 開啟主選單",
         areas=[
             RichMenuArea(bounds=RichMenuBounds(x=0, y=0, width=1250, height=843),
-                        action=MessageAction(label="每日步數", text="每日步數")),
+                        action=MessageAction(label="每日步數", text=get_text("get_steps", lang_id))),
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=0, width=1250, height=843),
-                        action=MessageAction(label="消耗卡路里", text="消耗卡路里")),
+                        action=MessageAction(label="消耗卡路里", text=get_text("get_calories", lang_id))),
             RichMenuArea(bounds=RichMenuBounds(x=0, y=843, width=1250, height=843),
-                        action=MessageAction(label="查詢心率", text="查詢心率")),
+                        action=MessageAction(label="查詢心率", text=get_text("get_heartrate", lang_id))),
             RichMenuArea(bounds=RichMenuBounds(x=1250, y=843, width=1250, height=843),
-                        action=MessageAction(label="選擇語言", text="選擇語言")),
+                        action=MessageAction(label="選擇語言", text=get_text("choose_language", lang_id))),
         ]
     )
 

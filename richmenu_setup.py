@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 from lang_text import get_text, format_steps_message, format_calories_message, LANG_ID, check_missing_lang_keys
 import json
-
 # 載入 .env 的 Channel Access Token
 load_dotenv()
 channel_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
@@ -22,7 +21,8 @@ def get_user_language(user_id: str) -> int:
         return lang_data.get(user_id, 2)  # 如果找不到該用戶的設定，預設為繁體中文 (lang_id = 2)
     except (FileNotFoundError, json.JSONDecodeError):
         return 2  # 如果檔案不存在或讀取錯誤，預設為繁體中文
-lang_id = get_user_language()
+# user_id = event.source.user_id
+lang_id = get_user_language(4)
 try:
     # Step 1: 建立 Rich Menu 設定
     rich_menu = RichMenu(

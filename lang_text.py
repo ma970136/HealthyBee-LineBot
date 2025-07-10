@@ -49,7 +49,7 @@ TEXT_GROUP = {
     "get_calories":{
         1: "每日消耗卡路里",
         2: "每日消耗卡路里",
-        3: "Daily Calories Burned",
+        3: "Daily Calories",
         4: "日々の消費カロリー"
     },
 

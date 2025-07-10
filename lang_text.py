@@ -28,7 +28,7 @@ TEXT_GROUP = {
     "help": {
         1: "您可以使用以下指令：\n1. 查询心率\n2. 每日步数\n3. 每日消耗卡路里\n4. 选择语言",  # 简体中文
         2: "您可以使用以下指令：\n1. 查詢心率\n2. 每日步數\n3. 每日消耗卡路里\n4. 選擇語言",  # 繁體中文
-        3: "You can use the following commands:\n1. Get Heart Rate Data\n2. Daily Steps\n3. Daily Calories Burned\n4. Choose Language",  # English
+        3: "You can use the following commands:\n1. Get Heart Rate Data\n2. Daily Steps\n3. Daily Calories\n4. Choose Language",  # English
         4: "次のコマンドが使えます：\n1. 心拍数の確認\n2. 日々の歩数\n3. 日々の消費カロリー\n4. 言語選択",  # 日本語
     },
     

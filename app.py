@@ -317,7 +317,7 @@ def handle_message(event):
     lang_id = lang_data.get(user_id, 2)  # 預設為繁體中文
 
     # ✅ 查詢卡路里
-    if "每日消耗卡路里" in msg or "每日消耗卡路里" in msg or "Daily Calories Burned" in msg or "日々の消費カロリー" in msg:
+    if "每日消耗卡路里" in msg or "每日消耗卡路里" in msg or "Daily Calories" in msg or "日々の消費カロリー" in msg:
         img_path, message = get_Cal(langID=lang_id)
         # 發送圖片與日期時間訊息
         line_bot_api.reply_message(

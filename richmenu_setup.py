@@ -22,7 +22,7 @@ def get_user_language(user_id: str) -> int:
     except (FileNotFoundError, json.JSONDecodeError):
         return 2  # 如果檔案不存在或讀取錯誤，預設為繁體中文
 # user_id = event.source.user_id
-lang_id = 4
+lang_id = 3
 try:
     # Step 1: 建立 Rich Menu 設定
     rich_menu = RichMenu(

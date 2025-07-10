@@ -270,7 +270,7 @@ def handle_message(event):
     lang_id = lang_data.get(user_id, 2)
 
     # ✅ 選擇語言
-    if msg == "選擇語言":
+    if msg == "选择语言" or "選擇語言" or "Choose Language" or "言語選択":
         reply_text = "🌐 請選擇語言："
         quick_reply = QuickReply(items=[
             QuickReplyButton(action=MessageAction(label="繁體中文", text="語言：繁體中文")),
@@ -317,7 +317,7 @@ def handle_message(event):
     lang_id = lang_data.get(user_id, 2)  # 預設為繁體中文
 
     # ✅ 查詢卡路里
-    if "消耗卡路里" in msg:
+    if "每日消耗卡路里" or "每日消耗卡路里" or "Daily Calories Burned" or "日々の消費カロリー" in msg:
         img_path, message = get_Cal(langID=lang_id)
         # 發送圖片與日期時間訊息
         line_bot_api.reply_message(
@@ -335,7 +335,7 @@ def handle_message(event):
         # return
 
     # ✅ 查步數指令
-    if "每日步數" in msg:
+    if "每日步数" or "每日步數" or "Daily Steps" or "日々の歩数"in msg:
         thingspeak_url = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/fields/2.json?results=1000"
         img_path, message = get_Steps(langID=lang_id)
         # 發送圖片與日期時間訊息
@@ -352,7 +352,7 @@ def handle_message(event):
 
 
     # ✅ 查心率指令
-    if "查詢心率" in msg:
+    if "查询心率" or "查詢心率" or "Get Heart Rate Data" or "心拍数の確認"in msg:
         result = get_HeartRate()
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=get_text("bp_prefix", lang_id) + result))
         return
